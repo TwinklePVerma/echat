@@ -12,7 +12,7 @@ class API::V1::MessagesController < ApplicationController
       @chatroom = Chatroom.create(name: "DM#{params[:sender]}:#{params[:receiver]}")
       @chatroom.chatroom_users.create(user_id: params[:receiver])
       @chatroom.chatroom_users.create(user_id: params[:sender])
-      @message = [{ chatroom_id: @chatroom.id, body: 'Not chatted yet'}]
+      @message = [{ chatroom_id: @chatroom.id, body: 'Not chatted yet', status: 'new'}]
       render json: @message
     end
   end
