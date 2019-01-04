@@ -24,7 +24,7 @@ class API::V1::MessagesController < ApplicationController
   end
 
   def update
-    @message = {error: 'not data'}
+    @message = {error: 'no data'}
     @message = Message.find_by(id: params[:id])
     if @message.present?
       @message.update(body: message_params)

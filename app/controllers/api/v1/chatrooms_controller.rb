@@ -4,9 +4,6 @@ class API::V1::ChatroomsController < ApplicationController
   include ApplicationHelper
   before_action :find_chatroom, only: [:destroy, :update, :add_member]
 
-  def index
-  end
-
   def create
     @chatroom = Chatroom.create(name: params[:name], direct_message: 1)
     @chatroom.chatroom_users.create(user_id: params[:user])
