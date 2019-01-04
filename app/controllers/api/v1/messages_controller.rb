@@ -1,20 +1,26 @@
+# frozen_string_literal: true
+
 class API::V1::MessagesController < ApplicationController
   before_action :message_params, only: :update
-  before_action :find_chatroom
+  before_action :find_chatroom, except: :destroy
   after_action :update_chatroom_user, :update_chatroom
   
   def index
     if @chatroom.present?
-      @message = @chatroom.messages if @chatroom.present?
+      @message = @chatroom.messages
       @message = [{ chatroom_id: @chatroom.id, body: 'Not chatted yet'}] unless @message.present?
-      render json: @message
     else
       @chatroom = Chatroom.create(name: "DM#{params[:sender]}:#{params[:receiver]}")
       @chatroom.chatroom_users.create(user_id: params[:receiver])
       @chatroom.chatroom_users.create(user_id: params[:sender])
       @message = [{ chatroom_id: @chatroom.id, body: 'Not chatted yet', status: 'new'}]
-      render json: @message
     end
+    if @chatroom.scrum?
+      render json: {message: @message, scrum_name: @chatroom.name}
+    else
+      render json: {message: @message}
+    end
+    
   end
 
   def update
@@ -31,7 +37,7 @@ class API::V1::MessagesController < ApplicationController
     if @message.present?
       @message.destroy
     end
-    render json: {status: 'done'}
+    render json: {status: 'done', message_id: @message.id, user_id: @message.user_id}
   end
 
   protected
@@ -41,12 +47,12 @@ class API::V1::MessagesController < ApplicationController
   end
 
   def find_chatroom
-    if params[:sender].present? && params[:receiver].present?
+    if params[:type] == 'peer'
       sender = Chatroom.joins(:chatroom_users).where(chatroom_users: { user_id: params[:sender] })
       receiver = Chatroom.joins(:chatroom_users).where(chatroom_users: { user_id: params[:receiver] })
       @chatroom = (sender & receiver).first
-    else
-      @chatroom = Chatroom.find_by(id: params[:chatroom_id])
+    elsif params[:type] == 'scrum'
+      @chatroom = Chatroom.find_by(id: params[:receiver])
     end
   end
 

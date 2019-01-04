@@ -1,13 +1,11 @@
+# frozen_string_literal: true
+
 module ApplicationHelper
-  def unreadcount
-    @count = 0
-    chatroom_user = ChatroomUser.where(user_id: params[:id])
-    chatroom_user.each do |user|
-      chatroom = user.chatroom
-      if chatroom.updated_at > user.updated_at
-        @count = chatroom.messages.where("messages.updated_at > ?", user.updated_at).count
-      end
+  def unread_message_count(chatroom, chatroom_user)
+    count = 0
+    if chatroom.updated_at > chatroom_user.updated_at
+      count = chatroom.messages.where("messages.updated_at > ?", chatroom_user.updated_at).count
     end
-    render json: @count
-  end
+    return count
+  end  
 end
