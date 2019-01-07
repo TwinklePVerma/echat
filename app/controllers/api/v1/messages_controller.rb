@@ -10,7 +10,7 @@ class API::V1::MessagesController < ApplicationController
       @message = @chatroom.messages
       @message = [{ chatroom_id: @chatroom.id, body: 'Not chatted yet'}] unless @message.present?
     else
-      @chatroom = Chatroom.create(name: "DM#{params[:sender]}:#{params[:receiver]}")
+      @chatroom = Chatroom.create(name: "DM:#{params[:sender]}:#{params[:receiver]}")
       @chatroom.chatroom_users.create(user_id: params[:receiver])
       @chatroom.chatroom_users.create(user_id: params[:sender])
       @message = [{ chatroom_id: @chatroom.id, body: 'Not chatted yet', status: 'new'}]
@@ -18,7 +18,12 @@ class API::V1::MessagesController < ApplicationController
     if @chatroom.scrum?
       render json: {message: @message, scrum_name: @chatroom.name}
     else
-      render json: {message: @message}
+      if @peer.present?
+        peer_id = @peer.user_id
+      else
+        peer_id = params[:receiver]
+      end
+      render json: {message: @message, peer_id: peer_id}
     end
     
   end
@@ -47,12 +52,10 @@ class API::V1::MessagesController < ApplicationController
   end
 
   def find_chatroom
+    @chatroom = Chatroom.find_by(id: params[:receiver])
+    @peer = ''
     if params[:type] == 'peer'
-      sender = Chatroom.joins(:chatroom_users).where(chatroom_users: { user_id: params[:sender] })
-      receiver = Chatroom.joins(:chatroom_users).where(chatroom_users: { user_id: params[:receiver] })
-      @chatroom = (sender & receiver).first
-    elsif params[:type] == 'scrum'
-      @chatroom = Chatroom.find_by(id: params[:receiver])
+      @peer = @chatroom.chatroom_users.find_by('user_id != ?', params[:sender])
     end
   end
 
