@@ -5,7 +5,9 @@ class API::V1::ChatroomsController < ApplicationController
 
   def create
     @chatroom = Chatroom.create(name: params[:name], direct_message: 1)
-    @chatroom.chatroom_users.create(user_id: params[:user])
+    params[:member].each do |member_id|
+      @chatroom.chatroom_users.create(user_id: member_id)
+    end
     render json: @chatroom
   end
 
