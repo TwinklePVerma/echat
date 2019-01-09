@@ -1,4 +1,7 @@
 class Message < ApplicationRecord
+  
+  mount_uploader :attachment, AttachmentUploader
+
   belongs_to :chatroom
 
   after_create_commit { MessageBroadcastJob.perform_later(self) }
