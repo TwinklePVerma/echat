@@ -10,13 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_01_08_103209) do
+ActiveRecord::Schema.define(version: 2019_01_09_111216) do
 
   create_table "chatroom_users", force: :cascade do |t|
     t.integer "user_id"
     t.integer "chatroom_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "last_read_at"
     t.index ["chatroom_id"], name: "index_chatroom_users_on_chatroom_id"
   end
 

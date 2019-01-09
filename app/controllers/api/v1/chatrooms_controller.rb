@@ -4,11 +4,15 @@ class API::V1::ChatroomsController < ApplicationController
   before_action :find_chatroom, only: [:destroy, :update, :add_member, :remove_member, :show]
 
   def create
-    @chatroom = Chatroom.create(name: params[:name], direct_message: 1)
-    params[:member].each do |member_id|
-      @chatroom.chatroom_users.create(user_id: member_id)
+    if params[:member].length > 1 && params[:name].present?
+      @chatroom = Chatroom.create(name: params[:name], direct_message: 1)
+      params[:member].each do |member_id|
+        @chatroom.chatroom_users.create(user_id: member_id, last_read_at: Time.now)
+      end
+      render json: @chatroom
+    else
+      render json: {status: "error", message: "can not chatroom"}
     end
-    render json: @chatroom
   end
 
   def update
@@ -37,7 +41,7 @@ class API::V1::ChatroomsController < ApplicationController
 
   def add_member
     params[:member].each do |user|
-      @chatroom.chatroom_users.create(user_id: user)
+      @chatroom.chatroom_users.create(user_id: user, last_read_at: Time.now)
     end
     render json: {receiver: @chatroom.id, type: @chatroom.direct_message}
   end

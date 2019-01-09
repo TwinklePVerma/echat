@@ -19,7 +19,7 @@ class Message < ApplicationRecord
     chatroom = self.chatroom
     if chatroom.present?
       user = chatroom.chatroom_users.where(user_id: self.user_id)
-      user.update(updated_at: Time.zone.now)
+      user.update(last_read_at: Time.zone.now)
     end
   end
 end

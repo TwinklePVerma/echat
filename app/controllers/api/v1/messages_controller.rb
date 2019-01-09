@@ -11,8 +11,8 @@ class API::V1::MessagesController < ApplicationController
       @message = [{ chatroom_id: @chatroom.id, body: 'Not chatted yet'}] unless @message.present?
     else
       @chatroom = Chatroom.create(name: "DM:#{params[:sender]}:#{params[:receiver]}")
-      @chatroom.chatroom_users.create(user_id: params[:receiver])
-      @chatroom.chatroom_users.create(user_id: params[:sender])
+      @chatroom.chatroom_users.create(user_id: params[:receiver], last_read_at: Time.now)
+      @chatroom.chatroom_users.create(user_id: params[:sender], last_read_at: Time.now)
       @message = [{ chatroom_id: @chatroom.id, body: 'Not chatted yet', status: 'new'}]
     end
     if @chatroom.scrum?
@@ -29,7 +29,7 @@ class API::V1::MessagesController < ApplicationController
   end
 
   def update
-    @message = {error: 'no data'}
+    @message = {status: "error", message: "no data"}
     @message = Message.find_by(id: params[:id])
     if @message.present?
       @message.update(body: message_params)
@@ -42,7 +42,7 @@ class API::V1::MessagesController < ApplicationController
     if @message.present?
       @message.destroy
     end
-    render json: {status: 'done', message_id: @message.id, user_id: @message.user_id}
+    render json: {status: 'success', data: [message_id: @message.id, user_id: @message.user_id]}
   end
 
   protected
@@ -66,7 +66,7 @@ class API::V1::MessagesController < ApplicationController
   def update_chatroom_user
     if @chatroom.present?
       @user = @chatroom.chatroom_users.where(user_id: params[:sender])
-      @user.update(updated_at: Time.zone.now)
+      @user.update(last_read_at: Time.zone.now)
     end
   end
 end
