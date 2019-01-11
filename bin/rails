@@ -1,4 +1,7 @@
 #!/usr/bin/env ruby
+require 'rake'
 APP_PATH = File.expand_path('../config/application', __dir__)
+puts "\n== Executing swagger task =="
+system 'sudo rake swagger:docs'
 require_relative '../config/boot'
 require 'rails/commands'

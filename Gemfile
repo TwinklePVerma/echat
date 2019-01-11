@@ -3,6 +3,8 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '2.3.1'
 
+gem 'responders'
+gem 'swagger-docs'
 gem 'carrierwave'
 gem 'rack-cors', require: 'rack/cors'
 gem 'rails', '~> 5.2.2'
