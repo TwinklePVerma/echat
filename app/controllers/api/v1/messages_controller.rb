@@ -1,55 +1,83 @@
 # frozen_string_literal: true
 
 class API::V1::MessagesController < ApplicationController
-  before_action :message_params, only: :update
-  before_action :find_chatroom, except: :destroy
+  before_action :find_chatroom, except: [ :destroy, :update ]
   after_action :update_chatroom_user, :update_chatroom
   
+  swagger_controller :messages, 'Message'
+
+  swagger_api :index do
+    summary 'Return messages'
+    notes 'Notes...'
+    param :query, :receiver, :integer, :required, "Receiver Id"
+    param :query, :type, :integer, :optional, "Chatroom type"
+    param :query, :sender, :integer, :required, "Sender Id"
+    response :ok, "success"
+    response :error, "problem in creating chatroom"
+  end
+
   def index
     if @chatroom.present?
       @message = @chatroom.messages
       @message = [{ chatroom_id: @chatroom.id, body: 'Not chatted yet'}] unless @message.present?
     else
-      @chatroom = Chatroom.create(name: "DM:#{params[:sender]}:#{params[:receiver]}")
-      @chatroom.chatroom_users.create(user_id: params[:receiver], last_read_at: Time.now)
+      @chatroom = Chatroom.create(name: "DM:#{params[:sender]}:#{params[:receiver_user]}")
+      @chatroom.chatroom_users.create(user_id: params[:receiver_user])
       @chatroom.chatroom_users.create(user_id: params[:sender], last_read_at: Time.now)
       @message = [{ chatroom_id: @chatroom.id, body: 'Not chatted yet', status: 'new'}]
     end
     if @chatroom.scrum?
-      render json: {message: @message, scrum_name: @chatroom.name}
+      render json: {data: {message: @message, scrum_name: @chatroom.name}, status: :ok}
     else
       if @peer.present?
         peer_id = @peer.user_id
       else
-        peer_id = params[:receiver]
+        peer_id = params[:receiver_user]
       end
-      render json: {message: @message, peer_id: peer_id}
+      render json: {data: {message: @message, peer_id: peer_id}, status: :ok}
     end
     
   end
 
+  swagger_api :update do
+    summary 'Update message text'
+    notes 'Notes...'
+    param :path, :id, :integer, :required, "Message Id"
+    param :query, :message, :string, :required, "Message text"
+    response :ok, "success"
+    response :error, "problem in creating chatroom"
+  end
+
   def update
     @message = {status: "error", message: "no data"}
+    status = :error
     @message = Message.find_by(id: params[:id])
     if @message.present?
-      @message.update(body: message_params)
+      @message.update(data: params[:message])
+      status = :ok
     end
-    render json: @message
+    render json: {data: @message, status: status}
+  end
+
+
+  swagger_api :destroy do
+    summary 'delete message'
+    notes 'Notes...'
+    param :path, :id, :integer, :required, "Message Id"
+    response :ok, "success"
+    response :error, "problem in creating chatroom"
   end
 
   def destroy
     @message = Message.find_by(id: params[:id])
     if @message.present?
       @message.destroy
+      render json: {data: @message, status: :ok}
     end
-    render json: {status: 'success', data: [message_id: @message.id, user_id: @message.user_id]}
+    render json: {status: :error}
   end
 
   protected
-    
-  def message_params
-    params.require(:message).permit(:body)
-  end
 
   def find_chatroom
     @chatroom = Chatroom.find_by(id: params[:receiver])
