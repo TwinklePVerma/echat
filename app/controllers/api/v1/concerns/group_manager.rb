@@ -44,5 +44,25 @@ module API::V1::Concerns
       render json: {data: {chatroom: @chatroom, members: @chatroom.chatroom_users}},
               status: status
     end
+
+    def make_admin
+      status = :error
+      @chatroom = Chatroom.find_by(id: params["chatroom_id"])
+      if ChatroomUser.find_by(user_id: params["user_id"], chatroom_id: params["chatroom_id"]).admin!
+        status = :ok
+      end
+      render json: {data: {chatroom: @chatroom, members: @chatroom.chatroom_users}},
+              status: status
+    end
+
+    def dismiss_admin
+      status = :error
+      @chatroom = Chatroom.find_by(id: params["chatroom_id"])
+      if ChatroomUser.find_by(user_id: params["user_id"], chatroom_id: params["chatroom_id"]).user!
+        status = :ok
+      end
+      render json: {data: {chatroom: @chatroom, members: @chatroom.chatroom_users}},
+              status: status
+    end
   end
 end

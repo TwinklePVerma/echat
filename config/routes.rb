@@ -10,6 +10,8 @@ Rails.application.routes.draw do
       get 'archived_chat', to: 'chatrooms#archived_chat'
       put '/chatrooms/:id/archive', to: 'chatrooms#archive'
       put '/chatrooms/:id/active', to: 'chatrooms#active'
+      put 'make_admin', to: 'chatrooms#make_admin'
+      put 'dismiss_admin', to: 'chatrooms#dismiss_admin'
     end
   end
 end
