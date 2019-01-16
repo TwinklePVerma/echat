@@ -12,6 +12,7 @@ Rails.application.routes.draw do
       put '/chatrooms/:id/active', to: 'chatrooms#active'
       put 'make_admin', to: 'chatrooms#make_admin'
       put 'dismiss_admin', to: 'chatrooms#dismiss_admin'
+      resources :direct_messages, only: :index
     end
   end
 end
