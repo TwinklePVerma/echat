@@ -20,23 +20,9 @@ class API::V1::MessagesController < ApplicationController
     if @chatroom.present?
       @message = @chatroom.messages
       @message = [{ chatroom_id: @chatroom.id, body: 'Not chatted yet'}] unless @message.present?
-    else
-      @chatroom = Chatroom.create(name: "DM:#{params[:sender]}:#{params[:receiver_user]}")
-      @chatroom.chatroom_users.create(user_id: params[:receiver_user])
-      @chatroom.chatroom_users.create(user_id: params[:sender], last_read_at: Time.now)
-      @message = [{ chatroom_id: @chatroom.id, body: 'Not chatted yet', status: 'new'}]
+      render json: {data: {message: @message, scrum_name: @chatroom.name}},
+              status: :ok
     end
-    if @chatroom.scrum?
-      render json: {data: {message: @message, scrum_name: @chatroom.name}, status: :ok}
-    else
-      if @peer.present?
-        peer_id = @peer.user_id
-      else
-        peer_id = params[:receiver_user]
-      end
-      render json: {data: {message: @message, peer_id: peer_id}, status: :ok}
-    end
-    
   end
 
   swagger_api :update do
@@ -56,7 +42,8 @@ class API::V1::MessagesController < ApplicationController
       @message.update(data: params[:message])
       status = :ok
     end
-    render json: {data: @message, status: status}
+    render json: {data: @message},
+            status: status
   end
 
 
@@ -72,19 +59,17 @@ class API::V1::MessagesController < ApplicationController
     @message = Message.find_by(id: params[:id])
     if @message.present?
       @message.destroy
-      render json: {data: @message, status: :ok}
+      render json: {data: @message},
+              status: :ok
+    else
+      render json: {status: :error}
     end
-    render json: {status: :error}
   end
 
   protected
 
   def find_chatroom
     @chatroom = Chatroom.find_by(id: params[:receiver])
-    @peer = ''
-    if params[:type] == 'peer'
-      @peer = @chatroom.chatroom_users.find_by('user_id != ?', params[:sender])
-    end
   end
 
   def update_chatroom
