@@ -2,6 +2,7 @@ class API::V1::DirectMessagesController < ApplicationController
   after_action :update_chatroom_user, :update_chatroom
 
   def index
+    authenticate!
     users = [params[:sender], params[:receiver]]
     @chatroom = Chatroom.direct_message_for_users(users)
     @messages = @chatroom.messages

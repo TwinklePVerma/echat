@@ -3,8 +3,9 @@ module API::V1::Concerns
     extend ActiveSupport::Concern
     
     def create
+      authenticate!
       if params[:member].present? && params[:name].present? && params[:creator]
-        @chatroom = Chatroom.create(name: params[:name], direct_message: false)
+        @chatroom = @project.chatrooms.create(name: params[:name], direct_message: false)
         # params[:member].split(',').each do |member_id|        #swagger
         @chatroom.chatroom_users.create(user_id: params[:creator], last_read_at: Time.now).admin!
         params[:member].each do |member_id|                     #api
@@ -18,6 +19,7 @@ module API::V1::Concerns
     end
 
     def remove_member
+      authenticate!
       if @chatroom.present?
         chatroom_user = @chatroom.chatroom_users.find_by(user_id: params[:user_id])
         if chatroom_user.present?
@@ -31,6 +33,7 @@ module API::V1::Concerns
     end
 
     def add_member
+      authenticate!
       # params[:member].split(',').each do |user|        #swagger
       params[:member].each do |user|                     #api
         status = ''
@@ -46,6 +49,7 @@ module API::V1::Concerns
     end
 
     def make_admin
+      authenticate!
       status = :error
       @chatroom = Chatroom.find_by(id: params["chatroom_id"])
       if ChatroomUser.find_by(user_id: params["user_id"], chatroom_id: params["chatroom_id"]).admin!
@@ -56,6 +60,7 @@ module API::V1::Concerns
     end
 
     def dismiss_admin
+      authenticate!
       status = :error
       @chatroom = Chatroom.find_by(id: params["chatroom_id"])
       if ChatroomUser.find_by(user_id: params["user_id"], chatroom_id: params["chatroom_id"]).user!

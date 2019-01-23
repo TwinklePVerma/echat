@@ -17,6 +17,7 @@ class API::V1::MessagesController < ApplicationController
   end
 
   def index
+    authenticate!
     if @chatroom.present?
       @message = @chatroom.messages
       @message = [{ chatroom_id: @chatroom.id, body: 'Not chatted yet'}] unless @message.present?
@@ -35,6 +36,7 @@ class API::V1::MessagesController < ApplicationController
   end
 
   def update
+    authenticate!
     @message = {status: "error", message: "no data"}
     status = :error
     @message = Message.find_by(id: params[:id])
@@ -56,6 +58,7 @@ class API::V1::MessagesController < ApplicationController
   end
 
   def destroy
+    authenticate!
     @message = Message.find_by(id: params[:id])
     if @message.present?
       @message.destroy

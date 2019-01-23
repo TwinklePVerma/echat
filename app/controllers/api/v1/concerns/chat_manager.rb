@@ -3,6 +3,7 @@ module API::V1::Concerns
     extend ActiveSupport::Concern
     
     def archive
+      authenticate!
       if @chatroom.present?
         @chatroom.archived! 
         render json: {data: @chatroom},
@@ -12,6 +13,7 @@ module API::V1::Concerns
     end
 
     def active
+      authenticate!
       if @chatroom.present?
         @chatroom.active!
         render json: {data: @chatroom},

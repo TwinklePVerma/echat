@@ -5,6 +5,7 @@ class Chatroom < ApplicationRecord
 
   has_many :messages, dependent: :destroy
   has_many :chatroom_users, dependent: :destroy
+  belongs_to :project
 
   def peer?
     if self.direct_message == true
@@ -29,7 +30,7 @@ class Chatroom < ApplicationRecord
     if chatroom = where(name: name, direct_message: true).first
       chatroom
     else
-      chatroom = new(name: name, direct_message: true)
+      chatroom = new(name: name, direct_message: true, project_id: 2)
       users.each do |user|
         chatroom.chatroom_users.new(user_id: user)
       end

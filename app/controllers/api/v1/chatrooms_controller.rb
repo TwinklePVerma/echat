@@ -29,6 +29,7 @@ class API::V1::ChatroomsController < ApplicationController
   end
 
   def show
+    authenticate!
     if @chatroom.present?
       chatroom_users_data = []
       chatroom_users = @chatroom.chatroom_users
@@ -52,6 +53,7 @@ class API::V1::ChatroomsController < ApplicationController
   end
 
   def destroy
+    authenticate!
     if @chatroom.present?
       @chatroom.destroy
       render json: {status: :ok}
@@ -87,6 +89,7 @@ class API::V1::ChatroomsController < ApplicationController
   end
 
   def active_chat
+    authenticate!
     @response = FindChat.new(user_id: params[:user_id]).active_chat
     if @response.present?
       render json: {data: @response}, 
@@ -105,6 +108,7 @@ class API::V1::ChatroomsController < ApplicationController
   end
 
   def archived_chat
+    authenticate!
     @response = FindChat.new(user_id: params[:user_id]).archived_chat
     if @response.present?
       render json: {data: @response},

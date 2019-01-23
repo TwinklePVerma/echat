@@ -1,0 +1,6 @@
+<p>Name: <%= @project[:name] %></p>
+<p>Public Key: <%= @project[:public_key] %></p>
+<p>Secret Key: <%= @project[:secret_key] %></p>
+<%= form_with url: project_path(@project[:id]), method: 'PATCH' do |form| %>
+  <%= form.submit "~"%>
+<% end %>
