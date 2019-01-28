@@ -3,23 +3,24 @@ module API::V1::Concerns
     extend ActiveSupport::Concern
     
     def archive
-      authenticate!
-      if @chatroom.present?
-        @chatroom.archived! 
-        render json: {data: @chatroom},
-                status: :ok
-      end
-      render json: {status: :error} if !@chatroom.present?
+      chat_type(:archived!)
     end
 
     def active
+      chat_type(:active!)
+    end
+
+    protected
+
+    def chat_type method
       authenticate!
       if @chatroom.present?
-        @chatroom.active!
+        @chatroom.send(method)
         render json: {data: @chatroom},
                 status: :ok
+      else
+        render json: {status: :error}
       end
-      render json: {status: :error} if !@chatroom.present?
     end
   end
 end

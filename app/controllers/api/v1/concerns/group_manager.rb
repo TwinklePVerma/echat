@@ -49,22 +49,24 @@ module API::V1::Concerns
     end
 
     def make_admin
-      authenticate!
-      status = :error
-      @chatroom = Chatroom.find_by(id: params["chatroom_id"])
-      if ChatroomUser.find_by(user_id: params["user_id"], chatroom_id: params["chatroom_id"]).admin!
-        status = :ok
-      end
-      render json: {data: {chatroom: @chatroom, members: @chatroom.chatroom_users}},
-              status: status
+      admin_operation('admin!')
     end
 
     def dismiss_admin
+      admin_operation('user!')
+    end
+
+    protected
+    
+    def admin_operation operation
       authenticate!
       status = :error
       @chatroom = Chatroom.find_by(id: params["chatroom_id"])
-      if ChatroomUser.find_by(user_id: params["user_id"], chatroom_id: params["chatroom_id"]).user!
-        status = :ok
+      chatroom_user = ChatroomUser.find_by(user_id: params["user_id"], chatroom_id: params["chatroom_id"])
+      if chatroom_user.present?
+        if chatroom_user.send(operation)
+          status = :ok
+        end
       end
       render json: {data: {chatroom: @chatroom, members: @chatroom.chatroom_users}},
               status: status
