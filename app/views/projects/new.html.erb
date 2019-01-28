@@ -1,5 +1,37 @@
+<%= link_to 'Destroy', logout_path %> 
+
 <h1>Create Project to get access keys</h1>
 <%= form_with model: @project do |form| %>
  <%= form.text_field :name %>
  <%= form.submit "Create" %>
 <% end %>
+
+<table>
+  <thead>
+    <th>
+      PROJECT
+    </th>
+    <th>
+      PUBLIC KEY
+    </th>
+    <th>
+      SECRET KEY
+    </th>
+  </thead>
+  <% @projects.each do |project|%>
+    <tbody>
+      <td>
+        <%= project.name %>
+      </td>
+      <td>
+        <%= project.public_key %>
+      </td>
+      <td>
+        <p id="<%= project.name %>">********************</p>
+        <% obj = Crypt.new("#{project.public_key}#{Rails.application.secrets.secret_key_base}")%>
+        <%= obj.decrypt(project.secret_key) %>
+      </td>
+      </div>
+    </tbody>
+  <% end %>
+</table>

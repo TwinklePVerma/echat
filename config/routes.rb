@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
   mount ActionCable.server => '/cable'
   resources :projects
+  get 'login', to: 'admin_sessions#login'
+  resources :admin_sessions, only: :create
+  get 'logout', to: 'admin_sessions#logout'
   namespace :api do
     namespace :v1 do
       resources :chatrooms
