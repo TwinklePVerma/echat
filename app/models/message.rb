@@ -1,5 +1,6 @@
 class Message < ApplicationRecord
-  
+  validates_presence_of :body, :user_id, :chatroom_id
+
   mount_uploader :attachment, AttachmentUploader
 
   belongs_to :chatroom

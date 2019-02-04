@@ -22,9 +22,7 @@ module API::V1::Concerns
       authenticate!
       if @chatroom.present?
         chatroom_user = @chatroom.chatroom_users.find_by(user_id: params[:user_id])
-        if chatroom_user.present?
-          chatroom_user.destroy
-        end
+        chatroom_user.destroy if chatroom_user.present?
         render json: {data: {chatroom: @chatroom, members: @chatroom.chatroom_users}},
                 status: :ok
       else
@@ -36,16 +34,15 @@ module API::V1::Concerns
       authenticate!
       # params[:member].split(',').each do |user|        #swagger
       params[:member].each do |user|                     #api
-        status = ''
         if @chatroom.chatroom_users.find_by(user_id: user).present?
-          status = :error
+          @status = :error
         else
           @chatroom.chatroom_users.create(user_id: user)
-          status = :ok
+          @status = :ok
         end
       end
       render json: {data: {chatroom: @chatroom, members: @chatroom.chatroom_users}},
-              status: status
+              status: @status
     end
 
     def make_admin
@@ -60,14 +57,9 @@ module API::V1::Concerns
     
     def admin_operation operation
       authenticate!
-      status = :error
       @chatroom = Chatroom.find_by(id: params["chatroom_id"])
       chatroom_user = ChatroomUser.find_by(user_id: params["user_id"], chatroom_id: params["chatroom_id"])
-      if chatroom_user.present?
-        if chatroom_user.send(operation)
-          status = :ok
-        end
-      end
+      status = chatroom_user.present? ? (chatroom_user.send(operation) ? :ok : :error) : :error
       render json: {data: {chatroom: @chatroom, members: @chatroom.chatroom_users}},
               status: status
     end

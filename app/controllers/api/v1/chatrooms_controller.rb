@@ -33,7 +33,6 @@ class API::V1::ChatroomsController < ApplicationController
     if @chatroom.present?
       chatroom_users_data = []
       chatroom_users = @chatroom.chatroom_users
-      chatroom_users_data_temp = {}
       chatroom_users.each do |user|
         chatroom_users_data << user
       end
@@ -54,12 +53,8 @@ class API::V1::ChatroomsController < ApplicationController
 
   def destroy
     authenticate!
-    if @chatroom.present?
-      @chatroom.destroy
-      render json: {status: :ok}
-    else
-      render json: {status: :error}
-    end
+    status = @chatroom.present? ?  (@chatroom.destroy ? :ok : :error) : :error
+    render json: {status: status}
   end
 
   swagger_api :add_member do

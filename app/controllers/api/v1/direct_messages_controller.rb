@@ -5,8 +5,7 @@ class API::V1::DirectMessagesController < ApplicationController
     authenticate!
     users = [params[:sender], params[:receiver]]
     @chatroom = Chatroom.direct_message_for_users(users)
-    @messages = @chatroom.messages
-    @messages = [{ chatroom_id: @chatroom.id, body: 'Not chatted yet'}] unless @messages.present?
+    @messages = @chatroom.messages ? @chatroom.messages : [{ chatroom_id: @chatroom.id, body: 'Not chatted yet'}]
     render json: {data: {message: @messages, peer_id: params[:receiver]}}, 
             status: :ok      
   end
