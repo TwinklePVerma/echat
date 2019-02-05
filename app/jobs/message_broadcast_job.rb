@@ -12,6 +12,7 @@ class MessageBroadcastJob < ApplicationJob
   private
 
   def broadcast(message)
-    ChatroomChannel.broadcast_to(message.chatroom.name, {message: message, chatroom_name: message.chatroom.name})
+    data = { message: message, chatroom_name: message.chatroom.name }
+    ChatroomChannel.broadcast_to(message.chatroom.name, data)
   end
 end

@@ -1,0 +1,23 @@
+Style/FrozenStringLiteralComment:
+  Enabled: false
+Style/Documentation:
+  Enabled: false
+Style/ClassAndModuleChildren:
+  Enabled: false
+Style/GlobalVars:
+  Enabled: false
+AllCops:
+  Exclude:     
+    - 'db/**/*'
+    - 'config/**/*'     
+    - 'script/**/*'
+    - 'bin/*'
+    - 'app/uploaders/attachment_uploader.rb'
+    - 'test/test_helper.rb'
+    - 'test/application_system_test_case.rb'
+    - 'test/controllers/project_controller_test.rb'
+    - 'config.ru'
+    - 'Rakefile'
+    - 'app/channels/custom_enc_dec.rb'
+    - 'app/controllers/api/v1/concerns/group_manager.rb'
+    - 'app/controllers/api/v1/chatrooms_controller.rb'

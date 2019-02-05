@@ -1,7 +1,7 @@
 module API::V1::Concerns
   module ChatManager
     extend ActiveSupport::Concern
-    
+
     def archive
       chat_type(:archived!)
     end
@@ -12,14 +12,14 @@ module API::V1::Concerns
 
     protected
 
-    def chat_type method
+    def chat_type(method)
       authenticate!
       if @chatroom.present?
         @chatroom.send(method)
-        render json: {data: @chatroom},
-                status: :ok
+        render json: { data: @chatroom },
+               status: :ok
       else
-        render json: {status: :error}
+        render json: { status: :error }
       end
     end
   end
