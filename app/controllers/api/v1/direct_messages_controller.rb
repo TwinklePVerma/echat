@@ -1,5 +1,7 @@
 class API::V1::DirectMessagesController < ApplicationController
+  before_action :authenticate!
   after_action :update_chatroom_user, :update_chatroom
+  before_action :find_chatroom, except: %i[index]
 
   def index
     users = [params[:sender], params[:receiver]]

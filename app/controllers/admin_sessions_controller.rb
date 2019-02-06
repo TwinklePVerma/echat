@@ -1,7 +1,7 @@
 class AdminSessionsController < ActionController::Base
   before_action :find_admin_credentials, only: :create
-  skip_before_action :authenticate
-  
+  before_action :authenticate!, except: %i[login create logout]
+
   def login
     redirect_to new_project_path if session[:id].present?
   end

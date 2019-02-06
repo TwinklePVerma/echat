@@ -2,6 +2,10 @@ module API::V1::Concerns
   module ChatManager
     extend ActiveSupport::Concern
 
+    included do
+      before_action :find_chatroom, except: %i[archive active]
+    end
+
     def archive
       chat_type(:archived!)
     end

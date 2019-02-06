@@ -1,5 +1,7 @@
 class API::V1::MessagesController < ApplicationController
+  before_action :authenticate!
   before_action :find_chatroom, except: %i[destroy update]
+  before_action :find_message, only: %i[destroy update]
   after_action :update_chatroom_user, :update_chatroom
 
   swagger_controller :messages, 'Message'
@@ -15,14 +17,11 @@ class API::V1::MessagesController < ApplicationController
   end
 
   def index
-    if @chatroom.present?
-      @messages = [{ chatroom_id: @chatroom.id, body: 'Not chatted yet' }]
-      @messages = @chatroom.messages if @chatroom.messages.present?
-      render json: { data: { message: @messages, scrum_name: @chatroom.name } },
-             status: :ok
-      return
-    end
-    render json: { status: :error }
+    messages = [{ chatroom_id: @chatroom.id, body: 'Not chatted yet' }]
+    message = @chatroom.messages
+    messages = message if message.present?
+    render json: { data: { message: messages, scrum_name: @chatroom.name } },
+           status: :ok
   end
 
   swagger_api :update do
@@ -35,15 +34,9 @@ class API::V1::MessagesController < ApplicationController
   end
 
   def update
-    @message = { status: 'error', message: 'no data' }
-    status = :error
-    @message = Message.find_by(id: params[:id])
-    if @message.present?
-      @message.update(data: params[:message])
-      status = :ok
-    end
+    @message.update(data: params[:message])
     render json: { data: @message },
-           status: status
+           status: :ok
   end
 
   swagger_api :destroy do
@@ -55,30 +48,24 @@ class API::V1::MessagesController < ApplicationController
   end
 
   def destroy
-    @message = Message.find_by(id: params[:id])
-    if @message.present?
-      @message.destroy
-      render json: { data: @message },
-             status: :ok
-    else
-      render json: { status: :error }
-    end
+    @message.destroy
+    render json: { data: @message },
+           status: :ok
   end
 
   protected
 
-  def find_chatroom
-    @chatroom = Chatroom.find_by(id: params[:receiver])
+  def find_message
+    @message = Message.find_by(id: params[:id])
+    @message.present? ? true : (render json: { status: :error })
   end
 
   def update_chatroom
-    @chatroom.update(updated_at: Time.zone.now) if @chatroom.present?
+    @chatroom.update(updated_at: Time.zone.now)
   end
 
   def update_chatroom_user
-    return unless @chatroom.present?
-
-    @user = @chatroom.chatroom_users.exist?(params[:sender])
-    @user.update(last_read_at: Time.zone.now) if @user.present?
+    user = @chatroom.chatroom_users.exist?(params[:sender])
+    user.update(last_read_at: Time.zone.now) if user.present?
   end
 end

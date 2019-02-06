@@ -1,8 +1,8 @@
 require 'securerandom'
 
 class ProjectsController < ActionController::Base
-  skip_before_action :authenticate
-  
+  before_action :authenticate!, except: %i[new create update show]
+
   include ProjectHelper
 
   def new

@@ -5,7 +5,8 @@ class ChatroomChannel < ApplicationCable::Channel
     project = Project.find_project($params[:public_key])
     chatroom_user = ChatroomUser.exist?($params[:uid]) if project.present?
     chatroom_user.each do |room|
-      stream_for room.chatroom.name if project == room.chatroom.project
+      chatroom = room.chatroom
+      stream_for chatroom.name if project == chatroom.project
     end
   end
 
@@ -20,14 +21,15 @@ class ChatroomChannel < ApplicationCable::Channel
 
   protected
 
-  def enc_message(ids, message)
+  def dec_message(ids, message)
     obj = CustomEncDec.new("DM:#{ids.join(':')}")
     obj.decrypt(message)
   end
 
   def make_message_data(data)
-    ids = [data['message'][2]['value'], data['message'][0]['value']].sort
-    data['message'][3]['value'] = enc_message(ids, data['message'][3]['value'])
+    message = data['message']
+    ids = [message[2]['value'], message[0]['value']].sort
+    message[3]['value'] = dec_message(ids, message[3]['value'])
     get_message_data(data)
   end
 

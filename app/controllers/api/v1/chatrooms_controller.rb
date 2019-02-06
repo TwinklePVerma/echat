@@ -2,7 +2,9 @@ class API::V1::ChatroomsController < ApplicationController
   include API::V1::Concerns::GroupManager
   include API::V1::Concerns::ChatManager
 
-  before_action :find_chatroom, except: :create
+  before_action :authenticate!
+  action = %i[create active_chat archived_chat make_admin dismiss_admin]
+  before_action :find_chatroom, except: action
 
   respond_to :json
 
@@ -27,10 +29,6 @@ class API::V1::ChatroomsController < ApplicationController
   end
 
   def show
-    unless @chatroom.present?
-      render json: { status: :error }
-      return
-    end
     chatroom_users_data = []
     @chatroom.chatroom_users.each do |user|
       chatroom_users_data << user
@@ -39,95 +37,18 @@ class API::V1::ChatroomsController < ApplicationController
            status: :ok
   end
 
-  swagger_api :destroy do
-    summary 'Delete chatroom'
-    notes 'Notes...'
-    param :path, :id, :integer, :required, 'Chatroom Id'
-    response :ok, 'success'
-    response :error, 'error'
-  end
-
   def destroy
-    status = :error
-    if @chatroom.present?
-      status = @chatroom.destroy ? :ok : :error
-    end
+    status = @chatroom.destroy ? :ok : :error
     render json: { status: status }
   end
 
-  swagger_api :add_member do
-    summary 'Add members to group chatroom'
-    notes 'Notes...'
-    param :path, :id, :integer, :required, 'Chatroom Id'
-    param :query, :member, :array, :required, 'User ids'
-    response :ok, 'success'
-    response :error, 'error'
-  end
-
-  swagger_api :remove_member do
-    summary 'remove member to group chatroom'
-    notes 'Notes...'
-    param :path, :id, :integer, :required, 'Chatroom Id'
-    param :path, :user_id, :integer, :required, 'Member id'
-    response :ok, 'success'
-    response :error, 'error'
-  end
-
-  swagger_api :active_chat do
-    summary 'Return active chats of user'
-    notes 'Notes...'
-    param :query, :user_id, :integer, :required, 'User id'
-    response :ok, 'success'
-    response :error, 'no record found'
-  end
-
   def active_chat
-    @response = FindChat.new(user_id: params[:user_id]).active_chat
-    if @response.present?
-      render json: { data: @response },
-             status: :ok
-    else
-      render json: { status: :error }
-    end
-  end
-
-  swagger_api :archived_chat do
-    summary 'Return archive chats of user'
-    notes 'Notes...'
-    param :query, :user_id, :integer, :required, 'User id'
-    response :ok, 'success'
-    response :error, 'no record found'
+    response = FindChat.new(user_id: params[:user_id]).active_chat || :error
+    render json: { data: response }
   end
 
   def archived_chat
-    @response = FindChat.new(user_id: params[:user_id]).archived_chat
-    if @response.present?
-      render json: { data: @response },
-             status: :ok
-    else
-      render json: { status: :error }
-    end
-  end
-
-  swagger_api :archive do
-    summary 'Update chatroom status'
-    notes 'Notes...'
-    param :path, :id, :integer, :required, 'Chatroom Id'
-    response :ok, 'success'
-    response :error, 'error'
-  end
-
-  swagger_api :active do
-    summary 'Update chatroom status'
-    notes 'Notes...'
-    param :path, :id, :integer, :required, 'Chatroom Id'
-    response :ok, 'success'
-    response :error, 'error'
-  end
-
-  private
-
-  def find_chatroom
-    @chatroom = Chatroom.find_by(id: params[:id])
+    response = FindChat.new(user_id: params[:user_id]).archived_chat || :error
+    render json: { data: response }
   end
 end

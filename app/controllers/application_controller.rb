@@ -1,6 +1,13 @@
 class ApplicationController < ActionController::API
   include ActionController::MimeResponds
   before_action :authenticate!
+  before_action :find_chatroom
+
+  def find_chatroom
+    @project = Project.find_project(params['auth']['public_key'])
+    @chatroom = @project.chatrooms.find_by(id: params[:id])
+    @chatroom.present? ? true : (render json: { status: :error })
+  end
 
   def authenticate!
     keys = params.require('auth').permit('public_key', 'secret_key')
